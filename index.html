@@ -1,21 +1,83 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Live365 Player</title>
-    <style>
-      body { margin: 0; }
-    </style>
-  </head>
-  <body>
-    <iframe id="live365player" width="450" height="316" frameborder="0" allow="autoplay"></iframe>
-    <script>
-      window.addEventListener("DOMContentLoaded", function () {
-        const base = "https://live365.com/embeds/v1/player/a92216?s=md&m=dark&c=aac";
-        const timestamp = new Date().getTime();
-        const iframe = document.getElementById("live365player");
-        iframe.src = base + "&t=" + timestamp;
-      });
-    </script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <title>Now Playing</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: #eee;
+      margin: 0;
+      padding: 2em;
+    }
+    .card {
+      background: #222;
+      padding: 2em;
+      border-radius: 1em;
+      max-width: 500px;
+      margin: 2em auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+    .title {
+      font-size: 1.5em;
+      margin: 0;
+    }
+    .artist {
+      font-size: 1.2em;
+      margin: 0.2em 0 1em 0;
+      color: #ccc;
+    }
+    .tags, .description, .album {
+      margin: 0.5em 0;
+    }
+    .missing {
+      text-align: center;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div id="panel" class="card">
+    <p class="missing">Loading track metadata...</p>
+  </div>
+
+  <script>
+    async function loadMetadata() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const trackId = urlParams.get('id');
+
+      const panel = document.getElementById('panel');
+
+      if (!trackId) {
+        panel.innerHTML = "<p class='missing'>No track ID provided.</p>";
+        return;
+      }
+
+      try {
+        const res = await fetch("tracks.json");
+        const data = await res.json();
+        const match = data.find(row => row.canonicalId === trackId);
+
+        if (!match) {
+          panel.innerHTML = `<p class='missing'>No metadata found for <code>${trackId}</code>.</p>`;
+          return;
+        }
+
+        panel.innerHTML = `
+          <div class="title">${match.trackName}</div>
+          <div class="artist">by ${match.artistName}</div>
+          ${match.album ? `<div class="album"><strong>Album:</strong> ${match.album}</div>` : ''}
+          ${match.tags ? `<div class="tags"><strong>Tags:</strong> ${match.tags}</div>` : ''}
+          ${match.description ? `<div class="description">${match.description}</div>` : ''}
+        `;
+      } catch (e) {
+        panel.innerHTML = `<p class='missing'>Error loading metadata.</p>`;
+        console.error(e);
+      }
+    }
+
+    loadMetadata();
+  </script>
+</body>
 </html>
