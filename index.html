@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Live365 Player</title>
+    <style>
+      body { margin: 0; }
+    </style>
+  </head>
+  <body>
+    <iframe id="live365player" width="450" height="316" frameborder="0" allow="autoplay"></iframe>
+    <script>
+      window.addEventListener("DOMContentLoaded", function () {
+        const base = "https://live365.com/embeds/v1/player/a92216?s=md&m=dark&c=aac";
+        const timestamp = new Date().getTime();
+        const iframe = document.getElementById("live365player");
+        iframe.src = base + "&t=" + timestamp;
+      });
+    </script>
+  </body>
+</html>
